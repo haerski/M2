@@ -1668,6 +1668,7 @@ Bigraph = new Type of Graph
 bigraph = method(Options => {Singletons => null})
 bigraph HashTable := opts -> g -> new Bigraph from graph(g, opts)
 bigraph List := opts -> g -> new Bigraph from graph(g, opts)
+bigraph (List,List) := opts -> (g,e) -> new Bigraph from graph(g,e,opts)
 
 graphData = "graphData"
 labels = "labels"
