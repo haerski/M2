@@ -428,6 +428,13 @@ writeDotFile (String, Graph) := (filename, G) -> (
     fil << "}" << endl << close;
     )
 
+writeDotFile (String, Digraph) := (filename, G) -> (
+    fil := openOut filename;
+    fil << "digraph {" << endl;
+    vertexSet G / (i -> fil << toString i | " -> " | toString toList children(G,i) << endl);
+    fil << "}" << close;
+    )
+
 ------------------------------------------
 -- Derivative graphs
 ------------------------------------------
@@ -1780,6 +1787,40 @@ collateVertices MixedGraph := g -> (
     scan(v,j->if x#?j then hh#j=x#j else hh#j={});
     bb := bigraph(new HashTable from hh);
     mixedGraph(gg,dd,bb))
+
+displayGraph (String, String, MixedGraph) := (dotfilename, jpgfilename, G) -> (
+     writeDotFile(dotfilename, G);
+     runcmd(graphs'DotBinary  | " -Tjpg " | dotfilename | " -o " | jpgfilename);
+     runcmd(graphs'JpgViewer  | " " | jpgfilename|" &");
+     )
+displayGraph (String, MixedGraph) := (dotfilename, G) -> (
+     jpgfilename := temporaryFileName() | ".jpg";
+     displayGraph(dotfilename, jpgfilename, G);
+     )
+displayGraph MixedGraph := G -> (
+     dotfilename := temporaryFileName() | ".dot";
+     displayGraph(dotfilename, G);
+     )
+
+writeDotFile (String, MixedGraph) := (filename, G) -> (
+    fil := openOut filename;
+    fil << "digraph {" << endl;
+    
+    D := digraph G;
+    vertexSet D / (i -> fil << toString i | " -> " | toString toList children(D,i) << endl);
+    
+    B := bigraph G;
+    M := adjacencyMatrix B;
+    n := numColumns M;
+    if n != 0 then (
+        M':= matrix table(n,n, (i,j) -> if i>j then 0 else M_(i,j));
+        B' := digraph(vertexSet B, M');
+    
+        vertexSet B' / (i -> fil << toString i | " -> " | toString toList children(B',i) | " [dir=both]" << endl);
+    );
+    fil << "}";
+    fil << close;
+)
 
 
 ------------------------------------------
