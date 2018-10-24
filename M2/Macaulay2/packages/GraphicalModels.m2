@@ -1074,6 +1074,7 @@ trekIdeal (Ring,MixedGraph) := Ideal => (R,g) -> (
      else if not ( 1..R.gaussianRingData === sort vertices(g))  then 
          error "variables names in mixedGraph do not match variable names in the Gaussian ring";
      Stmts:= trekSeparation g;
+     if #Stmts == 0 then return ideal(0_R);
      vv := sort vertices g;
      SM := covarianceMatrix R ;	
      sum apply(Stmts,s->minors(#s#2+#s#3+1, submatrix(SM,apply(s#0,x->pos(vv,x)),apply(s#1,x->pos(vv,x)))))
