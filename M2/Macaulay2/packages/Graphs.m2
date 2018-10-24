@@ -1748,13 +1748,14 @@ net MixedGraph := g -> horizontalJoin flatten (
     "}"
     )
 
-toString MixedGraph := g -> concatenate(
-    "new ", toString class g#graph,
-    if parent g#graph =!= Nothing then (" of ", toString parent g),
-    " from {",
-    if #g#graph > 0 then demark(", ", apply(pairs g#graph, (k,v) -> toString k | " => " | toString v)) else "",
-    "}"
-    )
+
+toString MixedGraph := g -> (
+        gg := graph g;
+        "mixedGraph(" |
+        toString gg#Graph | ", " |
+        toString gg#Digraph | ", " |
+        toString gg#Bigraph | ")"
+)
 
 graph MixedGraph := opts -> g -> g#graph
 digraph MixedGraph := opts -> g -> g#graph#Digraph
