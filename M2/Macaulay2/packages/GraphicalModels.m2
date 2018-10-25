@@ -558,7 +558,7 @@ gaussianRing Digraph :=  Ring => opts -> (G) -> (
      s := toSymbol opts.sVariableName;
      kk := opts.Coefficients;
      vv := sort vertices G; 
-     -- if (not gaussianRingList#?(kk,s,vv)) then ( 
+     if (not gaussianRingList#?(kk,s,G)) then ( 
 	  --(kk,s,vv) uniquely identifies gaussianRing in case of Digraph input.
      w := delete(null, flatten apply(vv, i -> apply(vv, j -> if pos(vv,i)>pos(vv,j) then null else (i,j))));
      v := apply (w, ij -> s_ij);
@@ -567,7 +567,8 @@ gaussianRing Digraph :=  Ring => opts -> (G) -> (
      H := new HashTable from apply(#w, i -> w#i => R_i); 
      R.gaussianVariables = H;
      R.digraph = G;
-     R
+     gaussianRingList#(kk,s,G) = R;);
+     gaussianRingList#(kk,s,G);
      )
 
 
@@ -582,9 +583,8 @@ gaussianRing MixedGraph := Ring => opts -> (g) -> (
      l := toSymbol opts.lVariableName;
      p := toSymbol opts.pVariableName;
      kk := opts.Coefficients;          
-     -- if (not gaussianRingList#?(kk,s,l,p,vv)) then ( 
+     if (not gaussianRingList#?(kk,s,l,p,G)) then ( 
      --(kk,s,l,p,vv) uniquely identifies gaussianRing in case of MixedGraph input.
-     -- TODO fix this function, the above is false
      sL := delete(null, flatten apply(vv, x-> apply(vv, y->if pos(vv,x)>pos(vv,y) then null else s_(x,y))));
      lL := delete(null, flatten apply(vv, x-> apply(toList dd#x, y->l_(x,y))));	 
      pL := join(apply(vv, i->p_(i,i)),delete(null, flatten apply(vv, x-> apply(toList bb#x, y->if pos(vv,x)>pos(vv,y) then null else p_(x,y)))));
@@ -600,7 +600,8 @@ gaussianRing MixedGraph := Ring => opts -> (g) -> (
      R#numberOfEliminationVariables = m;
      R.gaussianRingData = {#vv,s,l,p};
      R.mixedGraph = g;
-     R
+     gaussianRingList#(kk,s,l,p,G) = R);
+     gaussianRingList#(kk,s,l,p,G)
      )
 
 
