@@ -13,7 +13,7 @@ newPackage select((
 	  {Name => "Robert Krone", Email => "krone@math.gatech.edu"}
 	  },
      Configuration => { "PHCPACK" => "phc",  "BERTINI" => "bertini", "HOM4PS2" => "hom4ps2" },	
-     PackageExports => {"NAGtypes","NumericalHilbert","SLPexpressions","LLLBases"},
+     PackageExports => {"NAGtypes","DualSpaces","SLPexpressions","LLLBases"},
      PackageImports => {"PHCpack","Bertini","Truncations"},
      -- DebuggingMode should be true while developing a package, 
      --   but false after it is done
@@ -48,7 +48,7 @@ export {
      "gamma","tDegree","tStep","tStepMin","stepIncreaseFactor","numberSuccessesBeforeIncrease",
      "Predictor","RungeKutta4","Multistep","Tangent","Euler","Secant","MultistepDegree","Certified",
      "EndZoneFactor", "maxCorrSteps", "InfinityThreshold", 
-     "Normalize", "Projectivize",
+     "Projectivize",
      "AffinePatches", "DynamicPatch",
      "SLP", "HornerForm", "CompiledHornerForm", "CorrectorTolerance", "SLPcorrector", "SLPpredictor",
      "NoOutput",

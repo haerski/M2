@@ -23,6 +23,7 @@ export {
      "zeroDimensionalDual",
      "gCorners",
      "socles",
+     "sCorners",
      "localHilbertRegularity",
      "eliminatingDual",
      "innerProduct",
@@ -36,6 +37,7 @@ export {
      "numericalImage",
      "colReduce",
      "adjointMatrix",
+     "newGCorners",
 
      "noethOps",
      "DependentSet",
@@ -159,6 +161,8 @@ initializeDualData (Matrix,Boolean,Number) := o -> (Igens,syl,t) -> (
     if H.syl then H.dBasis = (map(R,S,{1_R} | gens R)) H.dBasis;
     new TruncDualData from H
     )
+truncDualData = initializeDualData
+
 -- advances the truncated dual computation from whatever was stored in parameters up to degree d
 nextTDD = method()
 nextTDD (TruncDualData,Number) := (H,t) -> nextTDD(H.deg + 1,H,t)
@@ -305,6 +309,7 @@ socles Matrix := gCs -> (
     S = unique S;
     matrix{S}
     )
+sCorners = socles
 
 hilbertFunction DualSpace := L -> (
     if not L.Space.Reduced then L = reduceSpace L;

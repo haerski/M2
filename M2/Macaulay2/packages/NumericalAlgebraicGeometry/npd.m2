@@ -4,7 +4,7 @@
 -------------------------------------------------------
 export { "isPointEmbedded", "isPointEmbeddedInCurve", "AllVisible" }
 
-debug NumericalHilbert
+debug DualSpaces
 
 isPointEmbedded = method(Options=>{AllVisible=>false})
 isPointEmbedded(Point, Ideal, List) := o -> (p,I,C) -> ( -- C is a list of witness sets for irreducible components
