@@ -816,7 +816,7 @@ numericalNoetherianOperators(Ideal, List) := List => opts -> (I, pts) -> (
         numBasis = if opts.NumBasis =!= null then sub(opts.NumBasis,R) else basis(0,opts.InterpolationDegreeLimit, R);
         denBasis = if opts.DenBasis =!= null then sub(opts.DenBasis,R) else basis(0,opts.InterpolationDegreeLimit, R);
     );
-    if #pts < numColumns numBasis + numColumns denBasis then error "Not enough points";
+    if #pts < numColumns numBasis + numColumns denBasis then error concatenate("At least ", toString(numColumns numBasis + numColumns denBasis), " points are needed for rational interpolation.");
     noethOpsAtPoints := pts / (p -> iterateNumNoethOps(J, p, opts.NoetherianDegreeLimit));
     netList noethOpsAtPoints;
     --error"debug";
