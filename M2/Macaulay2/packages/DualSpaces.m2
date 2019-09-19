@@ -47,7 +47,7 @@ export {
      "sanityCheck",
      "rationalInterpolation",
      "applyNOp",
-     "NumericalNoetherianOperators",
+     "numericalNoetherianOperators",
      "NumBasis",
      "DenBasis",
      "InterpolationBasis",
