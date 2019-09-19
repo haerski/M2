@@ -2,15 +2,17 @@
 newPackage(
      "DualSpaces",
      PackageExports => {"NAGtypes"},
-     Version => "0.1", 
-     Date => "Aug 1, 2019",
+     Version => "0.3",
+     Date => "Sep 19, 2019",
      Authors => {
         {Name => "Robert Krone", 
     	       Email => "krone@math.gatech.edu"},
         {Name => "Justin Chen", 
                Email => "jchen646@gatech.edu"},
         {Name => "Marc Harkonen", 
-               Email => "harkonen@gatech.edu"}
+               Email => "harkonen@gatech.edu"},
+        {Name => "Markus Wageringel",
+               Email => "mwageringel@uos.de"}
      },
      Headline => "numerically compute local dual spaces, Hilbert functions, and Noetherian operators",
      PackageImports => {"Truncations", "Bertini"},
@@ -821,9 +823,12 @@ numericalNoetherianOperators(Ideal, List) := List => opts -> (I, pts) -> (
     netList noethOpsAtPoints;
     --error"debug";
     if not same (noethOpsAtPoints / (i -> i / monomials)) then error "Support of Noetherian operators don't agree";
-    transpose noethOpsAtPoints / (L -> interpolateNOp(L, pts, numBasis, denBasis))
-
+    transpose noethOpsAtPoints / (L -> formatNoethOps interpolateNOp(L, pts, numBasis, denBasis))
 )
+
+formatNoethOps = xs -> fold(plus,
+    expression 0,
+    apply(xs, x -> (expression x#0#0) / (expression x#0#1) * x#1))
 
 iterateNumNoethOps = (J,p,degLim) -> (
     numOps := -1;
