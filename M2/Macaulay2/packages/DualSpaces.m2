@@ -41,7 +41,7 @@ export {
      "adjointMatrix",
      "newGCorners",
 
-     "noethOps",
+     "noetherianOperators",
      "DependentSet",
      "numNoethOpsAtPoint",
      "noethOpsFromComponents",
@@ -748,8 +748,8 @@ sanityCheck = (nops, I) -> (
 )
 
 
-noethOps = method(Options => {DegreeLimit => 5, DependentSet => null}) 
-noethOps (Ideal, Ideal) := List => opts -> (I, P) -> (
+noetherianOperators = method(Options => {DegreeLimit => 5, DependentSet => null}) 
+noetherianOperators (Ideal, Ideal) := List => opts -> (I, P) -> (
     R := ring I;
     depVars := if opts.DependentSet === null then gens R - set support first independentSets P
             else opts.DependentSet;
@@ -762,10 +762,10 @@ noethOps (Ideal, Ideal) := List => opts -> (I, P) -> (
     dS := zeroDimensionalDual(SradI,SI,Normalize=>false);
     return flatten entries gens dS
 )
-noethOps (Ideal) := List => opts -> (I) -> noethOps(I, ideal gens radical I, opts)
-noethOps (Ideal, Point) := List => opts -> (I, p) -> (
+noetherianOperators (Ideal) := List => opts -> (I) -> noetherianOperators(I, ideal gens radical I, opts)
+noetherianOperators (Ideal, Point) := List => opts -> (I, p) -> (
     P := ideal ((gens ring I) - p.Coordinates);
-    noethOps(I,P,opts)
+    noetherianOperators(I,P,opts)
 )
 
 approxKer = method(Options => {Tolerance => null})
@@ -779,7 +779,7 @@ approxKer(Matrix) := Matrix => o -> A -> (
 )
 
 
-numNoethOpsAtPoint = method(Options => options noethOps ++ options approxKer)
+numNoethOpsAtPoint = method(Options => options noetherianOperators ++ options approxKer)
 numNoethOpsAtPoint (Ideal, Point) := List => opts -> (I, p) -> numNoethOpsAtPoint(I, matrix p, opts)
 numNoethOpsAtPoint (Ideal, Matrix) := List => opts -> (I, p) -> (
     tol := if opts.Tolerance === null then defaultT(ring I) else opts.Tolerance;
@@ -1643,7 +1643,7 @@ doc ///
 TEST ///
 R = QQ[x,y,z]
 I = ideal(x^2 - y, y^2)
-nops = noethOps(I, DegreeLimit => 10)
+nops = noetherianOperators(I, DegreeLimit => 10)
 assert(sanityCheck(nops, I))
 ///
 
@@ -1651,10 +1651,10 @@ TEST ///
 R = QQ[x_0..x_3]
 S = QQ[s,t]
 I0 = ker map(S,R,{s^5,s^3*t^2, s^2*t^3, t^5})
-nops = noethOps(I0, DegreeLimit => 10)
+nops = noetherianOperators(I0, DegreeLimit => 10)
 assert(sanityCheck(nops, I0))
 I1 = ideal(x_0^2, x_1^2, x_2^2)
-nops = noethOps(I1, DegreeLimit => 10)
+nops = noetherianOperators(I1, DegreeLimit => 10)
 assert(sanityCheck(nops,I1))
 ///
 
@@ -1664,10 +1664,10 @@ R = QQ[x,y]
 I = ideal((x-1)^2,(x-1)*(y+1),(y+1)^3)
 J = ideal((x)^2,(x)*(y),(y)^3)
 Ps = associatedPrimes I
-nopsI = noethOps(I, first Ps)
+nopsI = noetherianOperators(I, first Ps)
 W = ring nopsI
 assert(set flatten entries gens nopsI === set{W_1^2, W_0, W_1, 1_W})
-nopsJ = noethOps(J, ideal gens R)
+nopsJ = noetherianOperators(J, ideal gens R)
 W = ring nopsJ
 assert((sort flatten entries gens nopsJ) == sort{W_1^2, W_0, W_1, 1_W})
 ///
@@ -1678,8 +1678,8 @@ R = QQ[x,y]
 I = ideal(x^2*(y-x))
 f = map(R,R,{2*x+y,x+y})
 J = f I
-NI = noethOps I
-NJ = noethOps J
+NI = noetherianOperators I
+NJ = noetherianOperators J
 WI = ring first NI
 WJ = ring first NJ
 convertedNI = NI / (i-> sub(coordinateChangeOps(i,f), WJ))
