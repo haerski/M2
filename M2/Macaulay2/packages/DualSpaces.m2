@@ -44,6 +44,7 @@ export {
      "noetherianOperators",
      "DependentSet",
      "numNoethOpsAtPoint",
+     "DSupport",
      "noethOpsFromComponents",
      "coordinateChangeOps",
      "sanityCheck",
@@ -779,20 +780,29 @@ approxKer(Matrix) := Matrix => o -> A -> (
 )
 
 
-numNoethOpsAtPoint = method(Options => options noetherianOperators ++ options approxKer)
+numNoethOpsAtPoint = method(Options => options noetherianOperators ++ options approxKer ++ {DSupport => null})
 numNoethOpsAtPoint (Ideal, Point) := List => opts -> (I, p) -> numNoethOpsAtPoint(I, matrix p, opts)
 numNoethOpsAtPoint (Ideal, Matrix) := List => opts -> (I, p) -> (
     tol := if opts.Tolerance === null then defaultT(ring I) else opts.Tolerance;
     R := ring I;
     var := if opts.DependentSet === null then gens R - set support first independentSets I
             else opts.DependentSet;
-    bx := flatten entries basis(0,opts.DegreeLimit,R, Variables => gens R);
-    bd := basis(0,opts.DegreeLimit,R, Variables => var);
 
-    elapsedTime M := diff(bd, transpose matrix {flatten (table(bx,I_*,(i,j) -> i*j))});
-    elapsedTime M' := sub(M,p);
-    elapsedTime K := colReduce(numericalKernel M', tol);
-
+    local M; local M'; local K; local bd; local bx;
+    numOps := -1;
+    for i in 0..opts.DegreeLimit do (
+        bx = if opts.DSupport === null then 
+                flatten entries basis(0,i,R, Variables => gens R)
+            else
+                flatten entries basis(0,flatten entries opts.DSupport / degree // flatten // max,R, Variables => gens R);
+        bd = if opts.DSupport === null then basis(0,i,R, Variables => var) else opts.DSupport;
+        elapsedTime M = diff(bd, transpose matrix {flatten (table(bx,I_*,(i,j) -> i*j))});
+        elapsedTime M' = sub(M,p);
+        elapsedTime K = numericalKernel (M', tol);
+        if numColumns K == numOps or opts.DSupport =!= null then break;
+        numOps = numColumns K;
+    );
+    K = colReduce(K, tol);
     -- Return elements in WeylAlgebra for nice formatting
     R' := diffAlg R;
     bdd := sub(bd, vars R');
@@ -809,6 +819,8 @@ numericalNoetherianOperators = method(Options => {
 numericalNoetherianOperators(Ideal, List) := List => opts -> (I, pts) -> (
     tol := opts.Tolerance;
     S := ring I;
+    indepSet := support first independentSets I;
+    depSet := gens S - set indepSet;
     R := CC monoid S;
     J := sub(I,R);
 
@@ -816,12 +828,13 @@ numericalNoetherianOperators(Ideal, List) := List => opts -> (I, pts) -> (
     if opts.InterpolationBasis =!= null then (numBasis = sub(opts.InterpolationBasis,R); denBasis = sub(opts.InterpolationBasis,R))
     else(
         numBasis = if opts.NumBasis =!= null then sub(opts.NumBasis,R) else basis(0,opts.InterpolationDegreeLimit, R);
-        denBasis = if opts.DenBasis =!= null then sub(opts.DenBasis,R) else basis(0,opts.InterpolationDegreeLimit, R);
+        denBasis = if opts.DenBasis =!= null then 
+            sub(opts.DenBasis,R) 
+        else 
+            basis(0,opts.InterpolationDegreeLimit, R, Variables => (indepSet / (i -> sub(i,R))));
     );
     if #pts < numColumns numBasis + numColumns denBasis then error concatenate("At least ", toString(numColumns numBasis + numColumns denBasis), " points are needed for rational interpolation.");
-    noethOpsAtPoints := pts / (p -> iterateNumNoethOps(J, p, opts.NoetherianDegreeLimit));
-    netList noethOpsAtPoints;
-    --error"debug";
+    noethOpsAtPoints := pts / (p -> numNoethOpsAtPoint(J, p, DegreeLimit => opts.NoetherianDegreeLimit, DependentSet => depSet / (i -> sub(i,R))));
     if not same (noethOpsAtPoints / (i -> i / monomials)) then error "Support of Noetherian operators don't agree";
     transpose noethOpsAtPoints / (L -> formatNoethOps interpolateNOp(L, pts, numBasis, denBasis))
 )
@@ -830,22 +843,14 @@ formatNoethOps = xs -> fold(plus,
     expression 0,
     apply(xs, x -> (expression x#0#0) / (expression x#0#1) * x#1))
 
-iterateNumNoethOps = (J,p,degLim) -> (
-    numOps := -1;
-    local ops;
-    for i in 0..(degLim) do (
-        ops = numNoethOpsAtPoint(J, p, DegreeLimit => i);
-        if numOps == #ops then break else numOps = #ops;
-    );
-    ops
-)
-
 
 interpolateNOp = (specializedNops, pts, numBasis, denBasis) -> (
     mons := flatten entries monomials specializedNops#0;
     coeffs := transpose (specializedNops / (i -> (coefficients i)#1) / entries / flatten);
     coeffs = coeffs / (i -> i / (j -> sub(j, CC)));
     interpolatedCoefficients := coeffs / (i -> rationalInterpolation(pts, i, numBasis, denBasis));
+    --print interpolatedCoefficients;
+    --sleep 8;
     -- pick the first one
     interpolatedCoefficients = interpolatedCoefficients / (i -> i / (j -> j_(0,0)));
     apply(interpolatedCoefficients, mons, (i,j) -> (i,j))
@@ -869,7 +874,7 @@ conjugate(Matrix) := Matrix => M -> (
 --                        (i -> (i / (j -> j-1))) / (e -> R_e)
 --)
 
-coordinateChangeOps = method()
+coordinateChangeOps = method() -----TODO: fix this, now expects polynomial coefficients
 coordinateChangeOps(RingElement, RingMap) := RingElement => (D, f) -> (
     R := f.target;
     WA := ring D;
