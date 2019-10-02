@@ -834,7 +834,11 @@ numericalNoetherianOperators(Ideal, List) := List => opts -> (I, pts) -> (
             basis(0,opts.InterpolationDegreeLimit, R, Variables => (indepSet / (i -> sub(i,R))));
     );
     if #pts < numColumns numBasis + numColumns denBasis then error concatenate("At least ", toString(numColumns numBasis + numColumns denBasis), " points are needed for rational interpolation.");
-    noethOpsAtPoints := pts / (p -> numNoethOpsAtPoint(J, p, DegreeLimit => opts.NoetherianDegreeLimit, DependentSet => depSet / (i -> sub(i,R))));
+    firstNoethOps := numNoethOpsAtPoint(J, pts#0, DegreeLimit => opts.NoetherianDegreeLimit, DependentSet => depSet / (i -> sub(i,R)));
+    dSup := firstNoethOps / monomials / entries // flatten @@ flatten;
+    DR := ring first dSup;
+    proj := map(R,DR, vars R | vars R);
+    noethOpsAtPoints := pts / (p -> numNoethOpsAtPoint(J, p, DSupport => matrix{dSup / proj}));
     if not same (noethOpsAtPoints / (i -> i / monomials)) then error "Support of Noetherian operators don't agree";
     transpose noethOpsAtPoints / (L -> formatNoethOps interpolateNOp(L, pts, numBasis, denBasis))
 )
