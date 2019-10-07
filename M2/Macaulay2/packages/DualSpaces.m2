@@ -929,6 +929,7 @@ rationalInterpolation(List, List, Matrix, Matrix) := opts -> (pts, vals, numBasi
     --error"Debug";
     b := transpose matrix{{#pts:0_(coefficientRing R)}} || matrix{{1}};
     ans := clean(opts.Tolerance, solve(M,b, ClosestFit => true, Precision => ceiling (opts.Tolerance*log 10/log 2)));
+    if norm(M * ans - b) > opts.Tolerance then error "No rational function found";
     ans = sub(ans, ring numBasis);
     (numBasis * ans^{0..(nn - 1)}, denBasis * ans^{nn .. (nn+nd-1)})
 )
