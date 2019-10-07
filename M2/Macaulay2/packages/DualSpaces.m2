@@ -918,18 +918,19 @@ noethOpsFromComponents(HashTable) := List => H -> (
 -- colBasis: basis for denominator (row matrix)
 -- Outputs a sequence (numerator, denominator)
 rationalInterpolation = method(Options => {Tolerance => 1e-6})
-rationalInterpolation(List, List, Matrix, Matrix) := (RingElement, RingElement) => opts -> (pts, vals, numBasis, denBasis) -> (
+rationalInterpolation(List, List, Matrix, Matrix) := opts -> (pts, vals, numBasis, denBasis) -> (
     if numColumns numBasis + numColumns denBasis > #pts then error "Rational interpolation needs more points";
     R := ring numBasis_(0,0);
     nn := numColumns numBasis;
     nd := numColumns denBasis;
     M := apply(pts, vals, (pt,val) -> evaluate(numBasis, pt) | -val * evaluate(denBasis, pt));
     M = fold(M, (i,j) -> i || j);
-    ker := clean(opts.Tolerance, approxKer(M, Tolerance => opts.Tolerance));
-    if numColumns ker == 0 then error "No fitting rational function found";
-    -- Normalize
-    K := colReduce(ker, opts.Tolerance);
-    ((numBasis * K^{0..(nn - 1)}), (denBasis * K^{nn .. (nn+nd-1)}))
+    M = M || (matrix{{nn:0}} | M^{1}_{nn..nn+nd-1});
+    --error"Debug";
+    b := transpose matrix{{#pts:0_(coefficientRing R)}} || matrix{{1}};
+    ans := clean(opts.Tolerance, solve(M,b, ClosestFit => true, Precision => ceiling (opts.Tolerance*log 10/log 2)));
+    ans = sub(ans, ring numBasis);
+    (numBasis * ans^{0..(nn - 1)}, denBasis * ans^{nn .. (nn+nd-1)})
 )
 rationalInterpolation(List, List, Matrix) := (RingElement, RingElement) => opts -> (pts, vals, bas) -> (
     rationalInterpolation(pts,vals,bas,bas,opts)
