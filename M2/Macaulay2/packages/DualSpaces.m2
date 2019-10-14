@@ -55,7 +55,8 @@ export {
      "DenBasis",
      "InterpolationBasis",
      "InterpolationDegreeLimit",
-     "NoetherianDegreeLimit"
+     "NoetherianDegreeLimit",
+     "Saturate"
      }
 
 --TruncDualData private keys
@@ -815,7 +816,8 @@ numericalNoetherianOperators = method(Options => {
     DenBasis => null,
     InterpolationBasis => null,
     InterpolationDegreeLimit => 2,
-    NoetherianDegreeLimit => 5})
+    NoetherianDegreeLimit => 5,
+    Saturate => false})
 numericalNoetherianOperators(Ideal, List) := List => opts -> (I, pts) -> (
     tol := opts.Tolerance;
     S := ring I;
@@ -840,7 +842,7 @@ numericalNoetherianOperators(Ideal, List) := List => opts -> (I, pts) -> (
     proj := map(R,DR, vars R | vars R);
     noethOpsAtPoints := pts / (p -> numNoethOpsAtPoint(J, p, DSupport => matrix{dSup / proj}));
     if not same (noethOpsAtPoints / (i -> i / monomials)) then error "Support of Noetherian operators don't agree";
-    transpose noethOpsAtPoints / (L -> formatNoethOps interpolateNOp(L, pts, numBasis, denBasis))
+    transpose noethOpsAtPoints / (L -> formatNoethOps interpolateNOp(L, pts, numBasis, denBasis, opts.Saturate))
 )
 
 formatNoethOps = xs -> fold(plus,
@@ -848,11 +850,11 @@ formatNoethOps = xs -> fold(plus,
     apply(xs, x -> (expression x#0#0) / (expression x#0#1) * x#1))
 
 
-interpolateNOp = (specializedNops, pts, numBasis, denBasis) -> (
+interpolateNOp = (specializedNops, pts, numBasis, denBasis, sat) -> (
     mons := flatten entries monomials specializedNops#0;
     coeffs := transpose (specializedNops / (i -> (coefficients i)#1) / entries / flatten);
     coeffs = coeffs / (i -> i / (j -> sub(j, CC)));
-    interpolatedCoefficients := coeffs / (i -> rationalInterpolation(pts, i, numBasis, denBasis));
+    interpolatedCoefficients := coeffs / (i -> rationalInterpolation(pts, i, numBasis, denBasis, Saturate => sat));
     --print interpolatedCoefficients;
     --sleep 8;
     -- pick the first one
@@ -917,7 +919,7 @@ noethOpsFromComponents(HashTable) := List => H -> (
 -- numBasis: basis for numerator (row matrix)
 -- colBasis: basis for denominator (row matrix)
 -- Outputs a sequence (numerator, denominator)
-rationalInterpolation = method(Options => {Tolerance => 1e-6})
+rationalInterpolation = method(Options => {Tolerance => 1e-6, Saturate => false})
 rationalInterpolation(List, List, Matrix, Matrix) := opts -> (pts, vals, numBasis, denBasis) -> (
     if numColumns numBasis + numColumns denBasis > #pts then error "Rational interpolation needs more points";
     R := ring numBasis_(0,0);
@@ -925,13 +927,20 @@ rationalInterpolation(List, List, Matrix, Matrix) := opts -> (pts, vals, numBasi
     nd := numColumns denBasis;
     M := apply(pts, vals, (pt,val) -> evaluate(numBasis, pt) | -val * evaluate(denBasis, pt));
     M = fold(M, (i,j) -> i || j);
-    M = M || (matrix{{nn:0}} | M^{1}_{nn..nn+nd-1});
-    --error"Debug";
-    b := transpose matrix{{#pts:0_(coefficientRing R)}} || matrix{{1}};
-    ans := clean(opts.Tolerance, solve(M,b, ClosestFit => true, Precision => ceiling (opts.Tolerance*log 10/log 2)));
-    if norm(M * ans - b) > opts.Tolerance then error "No rational function found";
-    ans = sub(ans, ring numBasis);
-    (numBasis * ans^{0..(nn - 1)}, denBasis * ans^{nn .. (nn+nd-1)})
+    local K;
+    if opts.Saturate == true then (
+        M = M || (matrix{{nn:0}} | M^{1}_{nn..nn+nd-1});
+        b := transpose matrix{{#pts:0_(coefficientRing R)}} || matrix{{1}};
+        K = clean(opts.Tolerance, solve(M,b, ClosestFit => true, Precision => ceiling (opts.Tolerance*log 10/log 2)));
+        if norm(M * K - b) > opts.Tolerance then error "No fitting rational function found";
+        K = sub(K, ring numBasis);
+    ) else (
+        ker := clean(opts.Tolerance, approxKer(M, Tolerance => opts.Tolerance));
+        if numColumns ker == 0 then error "No fitting rational function found";
+        -- Normalize
+        K = colReduce(ker, opts.Tolerance);
+    );
+    ((numBasis * K^{0..(nn - 1)}), (denBasis * K^{nn .. (nn+nd-1)}))
 )
 rationalInterpolation(List, List, Matrix) := (RingElement, RingElement) => opts -> (pts, vals, bas) -> (
     rationalInterpolation(pts,vals,bas,bas,opts)
