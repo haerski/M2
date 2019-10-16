@@ -793,9 +793,9 @@ numNoethOpsAtPoint (Ideal, Matrix) := List => opts -> (I, p) -> (
     numOps := -1;
     for i in 0..opts.DegreeLimit do (
         bx = if opts.DSupport === null then 
-                flatten entries basis(0,i,R, Variables => gens R)
+                flatten entries basis(0,i - 1,R, Variables => gens R)
             else
-                flatten entries basis(0,flatten entries opts.DSupport / degree // flatten // max,R, Variables => gens R);
+                flatten entries basis(0,(flatten entries opts.DSupport / degree // flatten // max) - 1,R, Variables => gens R);
         bd = if opts.DSupport === null then basis(0,i,R, Variables => var) else opts.DSupport;
         elapsedTime M = diff(bd, transpose matrix {flatten (table(bx,I_*,(i,j) -> i*j))});
         elapsedTime M' = sub(M,p);
