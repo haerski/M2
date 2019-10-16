@@ -826,23 +826,13 @@ numericalNoetherianOperators(Ideal, List) := List => opts -> (I, pts) -> (
     R := CC monoid S;
     J := sub(I,R);
 
-    local numBasis; local denBasis;
-    if opts.InterpolationBasis =!= null then (numBasis = sub(opts.InterpolationBasis,R); denBasis = sub(opts.InterpolationBasis,R))
-    else(
-        numBasis = if opts.NumBasis =!= null then sub(opts.NumBasis,R) else basis(0,opts.InterpolationDegreeLimit, R);
-        denBasis = if opts.DenBasis =!= null then 
-            sub(opts.DenBasis,R) 
-        else 
-            basis(0,opts.InterpolationDegreeLimit, R, Variables => (indepSet / (i -> sub(i,R))));
-    );
-    if #pts < numColumns numBasis + numColumns denBasis then error concatenate("At least ", toString(numColumns numBasis + numColumns denBasis), " points are needed for rational interpolation.");
     firstNoethOps := numNoethOpsAtPoint(J, pts#0, DegreeLimit => opts.NoetherianDegreeLimit, DependentSet => depSet / (i -> sub(i,R)));
     dSup := firstNoethOps / monomials / entries // flatten @@ flatten;
     DR := ring first dSup;
     proj := map(R,DR, vars R | vars R);
     noethOpsAtPoints := pts / (p -> numNoethOpsAtPoint(J, p, DSupport => matrix{dSup / proj}));
     if not same (noethOpsAtPoints / (i -> i / monomials)) then error "Support of Noetherian operators don't agree";
-    transpose noethOpsAtPoints / (L -> formatNoethOps interpolateNOp(L, pts, numBasis, denBasis, opts.Saturate))
+    transpose noethOpsAtPoints / (L -> formatNoethOps interpolateNOp(L, pts, opts.Saturate, R))
 )
 
 formatNoethOps = xs -> fold(plus,
@@ -850,11 +840,11 @@ formatNoethOps = xs -> fold(plus,
     apply(xs, x -> (expression x#0#0) / (expression x#0#1) * x#1))
 
 
-interpolateNOp = (specializedNops, pts, numBasis, denBasis, sat) -> (
+interpolateNOp = (specializedNops, pts, sat, R) -> (
     mons := flatten entries monomials specializedNops#0;
     coeffs := transpose (specializedNops / (i -> (coefficients i)#1) / entries / flatten);
     coeffs = coeffs / (i -> i / (j -> sub(j, CC)));
-    interpolatedCoefficients := coeffs / (i -> rationalInterpolation(pts, i, numBasis, denBasis, Saturate => sat));
+    interpolatedCoefficients := coeffs / (i -> rationalInterpolation(pts, i, R, Saturate => sat));
     --print interpolatedCoefficients;
     --sleep 8;
     -- pick the first one
@@ -944,6 +934,15 @@ rationalInterpolation(List, List, Matrix, Matrix) := opts -> (pts, vals, numBasi
 )
 rationalInterpolation(List, List, Matrix) := (RingElement, RingElement) => opts -> (pts, vals, bas) -> (
     rationalInterpolation(pts,vals,bas,bas,opts)
+)
+rationalInterpolation(List,List,Ring) := opts -> (pts, vals,R) -> (
+    d := 0;
+    local i; local b;
+    while (try (print d; b = basis(0,d,R); i = rationalInterpolation(pts, vals, b, opts)) then false else true) do (
+        if #pts <= 2*numColumns b then error ("At least " | toString(2*numColumns b + 1) | " points needed");
+        d = d+1;
+    );
+    i
 )
 
 
