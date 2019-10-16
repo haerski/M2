@@ -791,7 +791,7 @@ numNoethOpsAtPoint (Ideal, Matrix) := List => opts -> (I, p) -> (
 
     local M; local M'; local K; local bd; local bx;
     numOps := -1;
-    for i in 0..opts.DegreeLimit do (
+    for i in 1..opts.DegreeLimit do (
         bx = if opts.DSupport === null then 
                 flatten entries basis(0,i - 1,R, Variables => gens R)
             else
