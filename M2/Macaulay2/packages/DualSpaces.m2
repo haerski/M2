@@ -757,7 +757,7 @@ noetherianOperators (Ideal, Ideal) := List => opts -> (I, P) -> (
             else opts.DependentSet;
     indVars := gens R - set depVars;
     S := (frac((coefficientRing R)[indVars]))[depVars];
-    SradI := sub(radical I, S);
+    SradI := sub(P, S);
     SI := sub(I,S);
     -- S := (S'/II)[depVars];
     -- S := (frac((coefficientRing R)[indVars]))[depVars];
