@@ -817,12 +817,14 @@ numericalNoetherianOperators = method(Options => {
     InterpolationBasis => null,
     InterpolationDegreeLimit => 2,
     NoetherianDegreeLimit => 5,
-    Saturate => false})
+    Saturate => false,
+    DependentSet => null})
 numericalNoetherianOperators(Ideal, List) := List => opts -> (I, pts) -> (
     tol := opts.Tolerance;
     S := ring I;
-    indepSet := support first independentSets I;
-    depSet := gens S - set indepSet;
+    depSet := if opts.DependentSet === null then gens S - set support first independentSets I
+            else opts.DependentSet;
+    indSet := gens S - set depSet;
     R := CC monoid S;
     J := sub(I,R);
 
