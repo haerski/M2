@@ -9,8 +9,9 @@ newPackage(
 		  HomePage => "https://math.berkeley.edu/~mhelmer/"},
 	      {Name => "Christine Jost", 
 		  Email => "christine.e.jost@gmail.com"}},
-    	Headline => "Computes CSM classes, Segre classes and the Euler Char. for some Subschemes of Smooth Complete Toric Varieties",
+    	Headline => "CSM classes, Segre classes and the Euler characteristic for some subschemes of smooth complete toric varieties",
     	DebuggingMode => false,
+	PackageImports => { "Elimination", "PrimaryDecomposition", "NormalToricVarieties"},
 	Configuration => { "pathToBertini" => ""},
 	Certification => {
 	     "journal name" => "The Journal of Software for Algebra and Geometry",
@@ -31,7 +32,6 @@ newPackage(
 -- Check the ~/.Macaulay2/init-CharacteristicClasses.m2 file for the absolute path.
 bertini'path = (options CharacteristicClasses).Configuration#"pathToBertini";
 if not instance(bertini'path,String) then error "expected configuration option pathToBertini to be a string."
-needsPackage "NormalToricVarieties";
 --Exported functions/variables
 export{"Segre",
    "CSM",

@@ -33,6 +33,9 @@ MACOSX := $(shell if [ `uname -s` = Darwin ] ; then echo yes ; else echo no; fi)
 
 ifeq ($(MACOSX),yes)
 OPTLIBS += /usr/local/opt/readline
+# we add these libraries so we can build them without dynamic libraries
+BUILDLIBS += gdbm readline
+# I had to also manually move homebrew's dynamic library /usr/local/lib/libomp.dylib out of the way to avoid linking with it.  Find a better way.
 endif
 
 DIRECTORY ?= $(shell hostname)$(DIRSUFF)
@@ -44,10 +47,7 @@ ifeq ($(DEBUG),yes)
 CONFIGOPTIONS += --enable-debug --enable-memdebug --disable-optimize
 DIRECTORY := $(DIRECTORY).debug
 else
-ifneq ($(MACOSX),yes)
-# under Mac OS X, stripping the M2 binary seems to cause the program to crash on some examples, repeatedly
 CONFIGOPTIONS += --enable-strip
-endif
 ifeq ($(DEBIAN),yes)
 CONFIGOPTIONS += --enable-deb
 else
@@ -87,5 +87,5 @@ test :
 
 # Local Variables:
 # mode: makefile-gmake
-# compile-command: "time make SIGN=no DEBUG=no "
+# compile-command: "time gmake SIGN=no DEBUG=no "
 # End:

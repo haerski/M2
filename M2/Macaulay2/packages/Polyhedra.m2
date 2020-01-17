@@ -7,7 +7,7 @@
 --     	    	    September 2009, October 2009, January 2010
 ---------------------------------------------------------------------------
 newPackage("Polyhedra",
-    Headline => "A package for computations with convex polyhedra",
+    Headline => "convex polyhedra",
     Version => "1.10",
     Date => "November 12, 2018",
     AuxiliaryFiles => true,
@@ -36,8 +36,8 @@ newPackage("Polyhedra",
         Email => "k.l@fu-berlin.de"
      }
      },
-    DebuggingMode => false,
-    PackageExports=>{"FourTiTwo"}
+    PackageExports=>{"FourTiTwo"},
+    PackageImports=>{"IntegralClosure", "ReesAlgebra", "LLLBases"}
     )
 
 ---------------------------------------------------------------------------

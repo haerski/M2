@@ -6,7 +6,7 @@
 -- UPDATE HISTORY : November 2008, November 2009, April 2010
 ---------------------------------------------------------------------------
 newPackage("ToricVectorBundles",
-    Headline => "A package for computations with vector bundles on toric varieties",
+    Headline => "vector bundles on toric varieties",
     Version => "1.1",
     Date => "August 21, 2014",
     Authors => {
@@ -31,7 +31,6 @@ newPackage("ToricVectorBundles",
 	 "volume number" => "2",
 	 "volume URI" => "http://j-sag.org/Volume2/"
 	 },
-    DebuggingMode => true,
     Configuration => {},
     PackageExports => {"Polyhedra"}
     )
