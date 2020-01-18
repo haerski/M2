@@ -556,7 +556,7 @@ gaussianRing Digraph :=  Ring => opts -> (G) -> (
      s := toSymbol opts.sVariableName;
      kk := opts.Coefficients;
      vv := sort vertices G; 
-     if (not gaussianRingList#?(kk,s,G)) then ( 
+     if (not gaussianRingList#?(kk,s,vv)) then ( 
 	  --(kk,s,vv) uniquely identifies gaussianRing in case of Digraph input.
      w := delete(null, flatten apply(vv, i -> apply(vv, j -> if pos(vv,i)>pos(vv,j) then null else (i,j))));
      v := apply (w, ij -> s_ij);
@@ -565,8 +565,8 @@ gaussianRing Digraph :=  Ring => opts -> (G) -> (
      H := new HashTable from apply(#w, i -> w#i => R_i); 
      R.gaussianVariables = H;
      R.digraph = G;
-     gaussianRingList#(kk,s,G) = R;);
-     gaussianRingList#(kk,s,G);
+     gaussianRingList#((kk,s,vv)) = R;); 
+     gaussianRingList#((kk,s,vv))
      )
 
 
@@ -581,8 +581,8 @@ gaussianRing MixedGraph := Ring => opts -> (g) -> (
      l := toSymbol opts.lVariableName;
      p := toSymbol opts.pVariableName;
      kk := opts.Coefficients;          
-     if (not gaussianRingList#?(kk,s,l,p,G)) then ( 
-     --(kk,s,l,p,vv) uniquely identifies gaussianRing in case of MixedGraph input.
+     if (not gaussianRingList#?(kk,s,l,p,vv)) then ( 
+	  --(kk,s,l,p,vv) uniquely identifies gaussianRing in case of MixedGraph input.
      sL := delete(null, flatten apply(vv, x-> apply(vv, y->if pos(vv,x)>pos(vv,y) then null else s_(x,y))));
      lL := delete(null, flatten apply(vv, x-> apply(toList dd#x, y->l_(x,y))));	 
      pL := join(apply(vv, i->p_(i,i)),delete(null, flatten apply(vv, x-> apply(toList bb#x, y->if pos(vv,x)>pos(vv,y) then null else p_(x,y)))));
@@ -598,8 +598,8 @@ gaussianRing MixedGraph := Ring => opts -> (g) -> (
      R#numberOfEliminationVariables = m;
      R.gaussianRingData = {#vv,s,l,p};
      R.mixedGraph = g;
-     gaussianRingList#(kk,s,l,p,G) = R);
-     gaussianRingList#(kk,s,l,p,G)
+     gaussianRingList#((kk,s,l,p,vv)) = R;); 
+     gaussianRingList#((kk,s,l,p,vv))
      )
 
 
@@ -1073,7 +1073,6 @@ trekIdeal (Ring,MixedGraph) := Ideal => (R,g) -> (
      else if not ( 1..R.gaussianRingData === sort vertices(g))  then 
          error "variables names in mixedGraph do not match variable names in the Gaussian ring";
      Stmts:= trekSeparation g;
-     if #Stmts == 0 then return ideal(0_R);
      vv := sort vertices g;
      SM := covarianceMatrix R ;	
      sum apply(Stmts,s->minors(#s#2+#s#3+1, submatrix(SM,apply(s#0,x->pos(vv,x)),apply(s#1,x->pos(vv,x)))))
