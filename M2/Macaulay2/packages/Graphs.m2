@@ -343,7 +343,7 @@ net Digraph := Net => G -> (
     ))
 
 toString Digraph := String => D -> (
-    concatenate(
+    horizontalJoin(
         toLower toString class D, 
         " (",
         toString vertexSet D,
@@ -428,13 +428,6 @@ writeDotFile (String, Graph) := (filename, G) -> (
     E := flatten for i from 0 to #V - 1 list for j from i+1 to #V - 1 list if A_(i,j) == 1 or A_(j,i) == 1 then {i, j} else continue;
     scan(E, e -> fil << "\t" | toString e_0 | " -- " | toString e_1 | ";" << endl);
     fil << "}" << endl << close;
-    )
-
-writeDotFile (String, Digraph) := (filename, G) -> (
-    fil := openOut filename;
-    fil << "digraph {" << endl;
-    vertexSet G / (i -> fil << toString i | " -> " | toString toList children(G,i) << endl);
-    fil << "}" << close;
     )
 
 ------------------------------------------
@@ -1677,7 +1670,6 @@ Bigraph = new Type of Graph
 bigraph = method(Options => {Singletons => null})
 bigraph HashTable := opts -> g -> new Bigraph from graph(g, opts)
 bigraph List := opts -> g -> new Bigraph from graph(g, opts)
-bigraph (List,List) := opts -> (g,e) -> new Bigraph from graph(g,e,opts)
 
 graphData = "graphData"
 labels = "labels"
@@ -1750,14 +1742,13 @@ net MixedGraph := g -> horizontalJoin flatten (
     "}"
     )
 
-
-toString MixedGraph := g -> (
-        gg := graph g;
-        "mixedGraph(" |
-        toString gg#Graph | ", " |
-        toString gg#Digraph | ", " |
-        toString gg#Bigraph | ")"
-)
+toString MixedGraph := g -> concatenate(
+    "new ", toString class g#graph,
+    if parent g#graph =!= Nothing then (" of ", toString parent g),
+    " from {",
+    if #g#graph > 0 then demark(", ", apply(pairs g#graph, (k,v) -> toString k | " => " | toString v)) else "",
+    "}"
+    )
 
 graph MixedGraph := opts -> g -> g#graph
 digraph MixedGraph := opts -> g -> g#graph#Digraph
@@ -1790,40 +1781,6 @@ collateVertices MixedGraph := g -> (
     scan(v,j->if x#?j then hh#j=x#j else hh#j={});
     bb := bigraph(new HashTable from hh);
     mixedGraph(gg,dd,bb))
-
-displayGraph (String, String, MixedGraph) := (dotfilename, jpgfilename, G) -> (
-     writeDotFile(dotfilename, G);
-     runcmd(graphs'DotBinary  | " -Tjpg " | dotfilename | " -o " | jpgfilename);
-     runcmd(graphs'JpgViewer  | " " | jpgfilename|" &");
-     )
-displayGraph (String, MixedGraph) := (dotfilename, G) -> (
-     jpgfilename := temporaryFileName() | ".jpg";
-     displayGraph(dotfilename, jpgfilename, G);
-     )
-displayGraph MixedGraph := G -> (
-     dotfilename := temporaryFileName() | ".dot";
-     displayGraph(dotfilename, G);
-     )
-
-writeDotFile (String, MixedGraph) := (filename, G) -> (
-    fil := openOut filename;
-    fil << "digraph {" << endl;
-    
-    D := digraph G;
-    vertexSet D / (i -> fil << toString i | " -> " | toString toList children(D,i) << endl);
-    
-    B := bigraph G;
-    M := adjacencyMatrix B;
-    n := numColumns M;
-    if n != 0 then (
-        M':= matrix table(n,n, (i,j) -> if i>j then 0 else M_(i,j));
-        B' := digraph(vertexSet B, M');
-    
-        vertexSet B' / (i -> fil << toString i | " -> " | toString toList children(B',i) | " [dir=both]" << endl);
-    );
-    fil << "}";
-    fil << close;
-)
 
 
 ------------------------------------------
