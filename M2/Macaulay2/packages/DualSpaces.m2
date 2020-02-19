@@ -822,17 +822,17 @@ numericalNoetherianOperators = method(Options => {
 numericalNoetherianOperators(Ideal, List) := List => opts -> (I, pts) -> (
     tol := opts.Tolerance;
     S := ring I;
-    depSet := if opts.DependentSet === null then gens S - set support first independentSets I
+    depSet := if opts.DependentSet === null then error"Expected dependent set"--gens S - set support first independentSets I
             else opts.DependentSet;
     indSet := gens S - set depSet;
     R := CC monoid S;
     J := sub(I,R);
 
-    firstNoethOps := numNoethOpsAtPoint(J, pts#0, DegreeLimit => opts.NoetherianDegreeLimit, DependentSet => depSet / (i -> sub(i,R)));
+    firstNoethOps := numNoethOpsAtPoint(J, pts#0, DegreeLimit => opts.NoetherianDegreeLimit, DependentSet => depSet / (i -> sub(i,R)), Tolerance => tol);
     dSup := firstNoethOps / monomials / entries // flatten @@ flatten;
     DR := ring first dSup;
     proj := map(R,DR, vars R | vars R);
-    noethOpsAtPoints := pts / (p -> numNoethOpsAtPoint(J, p, DSupport => matrix{dSup / proj}));
+    noethOpsAtPoints := pts / (p -> numNoethOpsAtPoint(J, p, DSupport => matrix{dSup / proj}, DependentSet => depSet / (i -> sub(i,R))), Tolerance => tol);
     if not same (noethOpsAtPoints / (i -> i / monomials)) then error "Support of Noetherian operators don't agree";
     transpose noethOpsAtPoints / (L -> formatNoethOps interpolateNOp(L, pts, opts.Saturate, R))
 )
