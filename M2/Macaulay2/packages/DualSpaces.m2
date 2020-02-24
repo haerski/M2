@@ -797,9 +797,9 @@ numNoethOpsAtPoint (Ideal, Matrix) := List => opts -> (I, p) -> (
             else
                 flatten entries basis(0,(flatten entries opts.DSupport / degree // flatten // max) - 1,R, Variables => gens R);
         bd = if opts.DSupport === null then basis(0,i,R, Variables => var) else opts.DSupport;
-        elapsedTime M = diff(bd, transpose matrix {flatten (table(bx,I_*,(i,j) -> i*j))});
-        elapsedTime M' = sub(M,p);
-        elapsedTime K = numericalKernel (M', tol);
+        M = diff(bd, transpose matrix {flatten (table(bx,I_*,(i,j) -> i*j))});
+        M' = sub(M,p);
+        K = numericalKernel (M', tol);
         if numColumns K == numOps or opts.DSupport =!= null then break;
         numOps = numColumns K;
     );
@@ -841,12 +841,12 @@ formatNoethOps = xs -> fold(plus,
     expression 0,
     apply(xs, x -> (expression x#0#0) / (expression x#0#1) * x#1))
 
-
-interpolateNOp = (specializedNops, pts, sat, R) -> (
+interpolateNOp = method(Options => {Tolerance => 1e-6})
+interpolateNOp(List,List,Boolean,Ring) := List => opts -> (specializedNops, pts, sat, R) -> (
     mons := flatten entries monomials specializedNops#0;
     coeffs := transpose (specializedNops / (i -> (coefficients i)#1) / entries / flatten);
     coeffs = coeffs / (i -> i / (j -> sub(j, CC)));
-    interpolatedCoefficients := coeffs / (i -> rationalInterpolation(pts, i, R, Saturate => sat));
+    interpolatedCoefficients := coeffs / (i -> rationalInterpolation(pts, i, R, Saturate => sat, Tolerance => opts.Tolerance));
     --print interpolatedCoefficients;
     --sleep 8;
     -- pick the first one
