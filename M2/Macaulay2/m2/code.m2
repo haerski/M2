@@ -1,14 +1,12 @@
 --		Copyright 1993-1999, 2008 by Daniel R. Grayson
 
-emptyStack = stack()
-
 getSourceLines = method(Dispatch => Thing) 
 getSourceLines Nothing := null -> null
 getSourceLines Sequence := x -> (
      (filename,start,startcol,stop,stopcol,pos,poscol) -> if filename =!= "stdio" then (
 	  wp := set characters " \t\r);";
 	  file := (
-	       if filename === "layout.m2" then startupString
+	       if match("startup.m2.in$", filename) then startupString
 	       else if filename === "currentString" then currentString
 	       else (
 		    if not fileExists filename then error ("couldn't find file ", filename);

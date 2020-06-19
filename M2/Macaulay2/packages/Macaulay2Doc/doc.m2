@@ -368,7 +368,6 @@ document {
      load "Macaulay2Doc/demo2.m2"
      code f
      f 0
-     help
      return
      disassemble current
      step(-3)
@@ -539,14 +538,11 @@ undocumented {
 (symbol SPACE, WrapperType, Sequence),
 (symbol SPACE, Manipulator, Database),
 (symbol SPACE, Function, Thing),
-(symbol SPACE, MarkUpType, Hypertext),
 (symbol SPACE, Command, Thing),
 (symbol SPACE, Manipulator, Nothing),
 (symbol SPACE, WrapperType, Thing),
 (symbol SPACE, HeaderType, List),
 (symbol SPACE, HeaderType, Sequence),
-(symbol SPACE, MarkUpType, Net),
-(symbol SPACE, MarkUpType, String),
 (symbol SPACE, Thing, Thing),
 
 (symbol SPACE, Ring, Array),
