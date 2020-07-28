@@ -123,10 +123,15 @@ document { Key => (symbol ..<, IndexedVariable, IndexedVariable),
      Headline => "sequences of consecutive indexed variables",
      Inputs => {"s","t"},
      Outputs => {
-	  {"the sequence of indexed variables with the same base and with consecutive subscripts, not inculding the endpoint"}
+	  {"the sequence of indexed variables with consecutive subscripts, not inculding the endpoint"}
 	  },
+     PARA{"If the base symbol of ", TT "s", " and ", TT "t", " are the same, output a sequence of indexed variables with the same base."},
      EXAMPLE lines ///
      x_1
+     x_(a,1) ..< x_(c,3)
+     ///,
+     PARA{"If the base symbols are not the same, output a sequence of indexed variables not including the endpoints of either the base symbol or the indices."},
+     EXAMPLE lines ///
      x_(a,1) ..< z_(c,3)
      ///
      }
